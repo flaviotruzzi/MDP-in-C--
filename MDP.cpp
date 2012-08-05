@@ -4,13 +4,21 @@
  *  Created on: Jul 30, 2012
  *      Author: ftruzzi
  */
-
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include "MDP.h"
 
 #include <math.h>
-#include <Eigen/Array>
+#include <iostream>
 
-MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], MatrixXf CPC)
+using namespace std;
+
+//typedef Eigen::Triplet<double> T;
+
+void print(int *v) {
+  cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
+}
+
+MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC)
 {
   this->C =  C;
   this->G =  G;
@@ -26,25 +34,36 @@ MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], Matrix
 
   this->CPC = CPC;
 
-  S = pow((B+1),C)*(C+1);
+  S = (long)(pow(int(B+1),double(C))*(C+1));
   A = C+1;
 
   T = new SparseMatrix<double>[A];
   R = new SparseVector<double>[A];
 
+  eCPI = CTR.cwiseProduct(CPC.replicate(1,G));
+
+}
+
+void MDP::PopulateMtx() {
+
   int *sa =  new int[C+1];
   int *sc =  new int[C+1];
 
-
+  cout << "Creating Transation Matrix... " << endl;
 
   for (int a = 0; a < A; a++) {
       T[a] = SparseMatrix<double>(S,S);
       R[a] = SparseVector<double>(S);
-      for (int s = 0; s < S; s++) {
-          getStateOfIndex(s,&sa);
 
-          for (int g = 0; g < G; g++) {
-              memcpy(sc,sa,sizeof(sa));
+      T[a].reserve(20000);
+      R[a].reserve(20000);
+      int nonzero = 0;
+      for (int s = 0; s < S; s++) {
+          getStateOfIndex(s,sa);
+
+          for (int g = 0; g < G+1; g++) {
+
+              memcpy(sc,sa,C*sizeof(int));
 
               sc[C] = g;
 
@@ -53,34 +72,77 @@ MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], Matrix
               if (sc[C] == 0)
                 PI =  1-Prequest;
               else
-                PI = Prequest*Pg[sc[C]];
+                PI = Prequest*Pg[sc[C]-1];
 
               if ((a > 0) && (sa[C] > 0) && (sa[a] > 0)) {
-                  T[a](s,getIndexOfState(sc)) = PI*(1-CTR(sa[C],a-1));
+
+                  T[a].insert(s,getIndexOfState(sc)) = PI*(1-CTR(sa[C]-1,a-1));
+
                   sc[a] = sc[a]-1;
-                  T[a](s,getIndexOfState(sc)) = PI*CTR(sa[C],a-1);
-                  R[a](s) = eCPI(sa[C],a-1);
+
+                  T[a].insert(s,getIndexOfState(sc)) = PI*CTR(sa[C]-1,a-1);
+                  R[a].insert(s) = eCPI(sa[C]-1,a-1);
+                  nonzero++;
               } else {
-                  T[a](s,getIndexOfState(sc)) = PI;
+                  nonzero++;
+                  T[a].insert(s,getIndexOfState(sc)) = PI;
               }
 
           }
-
       }
+      T[a].finalize();
+      cout << "a:" << a << " " << nonzero << endl;
   }
-
+  cout << "Matrix T and R created" << endl;
   delete sa;
   delete sc;
 
 }
 
-int MDP::getIndexOfState(int *s) {
-  return 0;
+int MDP::checkT() {
+  int result = 0;
+  int l[] = {0,10,10,3};
+  cout << getIndexOfState(l) << endl;
+  cout << T[0].coeff(483,480) << " ";
+  cout << T[0].coeff(483,481) << " ";
+  cout << T[0].coeff(483,482) << " ";
+  cout << T[0].coeff(483,483) << " " << endl;
+
+  /*for (int k=0; k<T[0].outerSize(); ++k)
+    for (SparseMatrix<double>::InnerIterator it(T[0],k); it; ++it)
+    {
+      cout << it.row() << " " << it.col() << " " << it.value() << endl;
+    }*/
+  /*for (int s = 0; s < S; s++) {
+      double p = 0;
+      for (int a = 0; a < A; a++) {
+          SparseVector<double> t;
+          T[a].getRow(s,t);
+      }
+  }*/
+  return result;
 }
 
-void MDP::getStateOfIndex(long index, int **s) {
+int MDP::getIndexOfState(int *s) {
+  int n = C-1;
+  int p = 0;
+  for (int i = 0; i < C; i++) {
+      p = p + s[i]*pow(int(B+1),double(n));
+      n = n -1;
+  }
+  p = p*(G+1) + s[C];
+  return p;
+}
 
-  return;
+void MDP::getStateOfIndex(long index, int *s) {
+
+  s[C] = index%(G+1);
+  index = index/(G+1);
+
+  for (int i = C-1; i != 0; i--) {
+      s[i] = index%(B+1);
+      index = index/(B+1);
+  }
 
 }
 

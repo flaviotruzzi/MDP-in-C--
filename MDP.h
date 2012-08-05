@@ -7,7 +7,7 @@
 
 #ifndef MDP_H_
 #define MDP_H_
-
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
@@ -16,9 +16,11 @@ using namespace Eigen;
 class MDP
 {
 public:
-  MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], MatrixXf CPC);
-  void getStateOfIndex(long index, int **s);
+  MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC);
+  void getStateOfIndex(long index, int *s);
+  void PopulateMtx();
   int getIndexOfState(int *s);
+  int checkT();
 
   virtual
   ~MDP();
@@ -32,7 +34,7 @@ private:
   MatrixXf eCPI;
   MatrixXf CTR;
   double *Pg;
-  MatrixXf CPC;
+  VectorXf CPC;
   SparseMatrix<double> *T;
   SparseVector<double> *R;
   double Prequest;
