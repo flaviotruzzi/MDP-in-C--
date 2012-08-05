@@ -5,31 +5,35 @@
  *      Author: ftruzzi
  */
 
+#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
+
 #include <iostream>
 #include "Simulator.h"
+#include <Eigen/Dense>
+#include "MDP.h"
 
 using namespace std;
+using namespace Eigen;
 
 int main(int argc, char **argv) {
 
-  double Pg[] = { 0.5, 0.75, 1.0};
+  double Pg[] = { 0.5, 0.25, 0.25};
 
-  Simulator a(3,3,500,1000,.4,Pg);
+  //Simulator a(3,3,500,1000,.4,Pg);
 
+  MatrixXf CTR(3,3);
+  CTR << 0.05, 0.50, 0.05,
+      0.80, 0.81, 0.05,
+      0.05, 0.81, 0.80;
 
-  int k1=0;
-  int k2=0;
-  int k3=0;
+  VectorXf CPC(3);
 
-  for (int i = 0; i < 1000; i++) {
-      k1 += ((MatrixXd) a.simulations[i]).row(0).sum();
-      k2 += ((MatrixXd) a.simulations[i]).row(1).sum();
-      k3 += ((MatrixXd) a.simulations[i]).row(2).sum();
-  }
+  CPC << 1.0, 1.0, 1.0;
 
-  cout << k1/1000. << endl;
-  cout << k2/1000. << endl;
-  cout << k3/1000. << endl;
+  MDP k(3,3,10,.4,CTR,Pg,CPC);
+
+  k.PopulateMtx();
+  //k.checkT();
 
   return 0;
 }
