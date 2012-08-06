@@ -14,9 +14,6 @@ using namespace std;
 
 typedef Eigen::Triplet<double> Tr;
 
-VectorXf mult(SparseMatrix<double> first, MatrixXf second);
-VectorXf summ(VectorXf first, SparseVector<double> second);
-
 void print(int *v) {
   cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
 }
@@ -151,59 +148,20 @@ void MDP::getStateOfIndex(long index, int *s) {
 }
 
 void MDP::plan() {
-	V = VectorXf(S);
-	//V.setConstant(0.0);
-	policy = MatrixXf(S,tau);
-	Q = MatrixXf(S,A);
-	Q.setConstant(0.0);
+	/*   V = MatrixXf(S,1);
+   V.setConstant(0.0);
+   policy = MatrixXf(S,tau);
+   Q = MatrixXf(S,A);
+   Q.setConstant(0.0);
 
-	for (int t = 0; t < tau; t++) {
-		for (int a = 0; a < A; a++) {
-			//Q.col(a) = summ(mult(T[a],V),R[a]);
-			V+T[a];
-			//T[a]*V; //T[a].dot(V); //R[a];// + T[a]*(V);
-		}
-	}
+   for (int t = 0; t < tau; t++) {
+      for (int a = 0; a < A; a++) {
+         Q.col(a) = R[a] + T[a]*(V);
+      }
+   }*/
 }
 
 MDP::~MDP()
 {
   // TODO Auto-generated destructor stub
 }
-
-VectorXf mult(SparseMatrix<double> first, MatrixXf second) {
-	VectorXf output(first.rows());
-	for (int c = 0; c < first.rows(); c++) {
-		double sum = 0;
-		for (int d = 0; d < second.cols(); d++) {
-			for (int k = 0; k < first.cols(); k++) {
-				sum += double(first.coeff(c,k)) * double(second(k,d));
-			}
-		}
-		output(c) = sum;
-	}
-	return output;
-}
-
-
-VectorXf summ(VectorXf first, SparseVector<double> second) {
-	VectorXf output(first.rows());
-	for (int i = 0; i < first.rows(); i++) {
-		first(i) = first.coeff(i)+second.coeff(i);
-	}
-	return output;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-

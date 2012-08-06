@@ -38,7 +38,7 @@ private:
   MatrixXf CTR;
   double *Pg;
   VectorXf CPC;
-  VectorXf V;
+  MatrixXf V;
   MatrixXf Q;
   MatrixXf policy;
   SparseMatrix<double> *T;
