@@ -35,7 +35,7 @@ MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], Vector
 
   this->CPC = CPC;
 
-  S = (long)(pow(int(B+1),double(C))*(C+1));
+  S = (long)(pow(int(B+1),double(C))*(G+1));
   A = C+1;
 
   T = new SparseMatrix<double>[A];
@@ -50,17 +50,19 @@ void MDP::PopulateMtx() {
   int *sa =  new int[C+1];
   int *sc =  new int[C+1];
 
-  cout << "Creating Transation Matrix... " << endl;
+  //cout << "Creating Transation Matrix... " << endl;
 
   for (int a = 0; a < A; a++) {
       T[a] = SparseMatrix<double>(S,S);
       R[a] = SparseVector<double>(S);
 
-      //T[a].reserve(600000);
+
       R[a].reserve(600000);
+
       int nonzero = 0;
       std::vector<Tr> K;
       K.reserve(600000);
+
       for (int s = 0; s < S; s++) {
           getStateOfIndex(s,sa);
 
@@ -72,27 +74,24 @@ void MDP::PopulateMtx() {
 
               float PI = 0;
 
-              if (sc[C] == 0)
+              if (g == 0)
                 PI =  1-Prequest;
               else
-                PI = Prequest*Pg[sc[C]-1];
+                PI = Prequest*Pg[g-1];
 
-              if ((a > 0) && (sa[C] > 0) && (sa[a] > 0)) {
+              if ( (a != 0) && (sa[C] > 0) && (sa[a-1] > 0)) {
 
             	  K.push_back(Tr(s,getIndexOfState(sc),PI*(1-CTR(sa[C]-1,a-1))));
-                  //T[a].insert(s,getIndexOfState(sc)) = PI*(1-CTR(sa[C]-1,a-1));
 
-                  sc[a] = sc[a]-1;
+                  sc[a-1] = sc[a-1]-1;
 
-                  //T[a].insert(s,getIndexOfState(sc)) = PI*CTR(sa[C]-1,a-1);
                   K.push_back(Tr(s,getIndexOfState(sc),PI*CTR(sa[C]-1,a-1)));
 
                   R[a].insert(s) = eCPI(sa[C]-1,a-1);
-                  nonzero++;
-                  nonzero++;
+
+                  nonzero = nonzero +2;
               } else {
                   nonzero++;
-                  //T[a].insert(s,getIndexOfState(sc)) = PI;
 
                   K.push_back(Tr(s,getIndexOfState(sc),PI));
               }
@@ -140,7 +139,7 @@ void MDP::getStateOfIndex(long index, int *s) {
   s[C] = index%(G+1);
   index = index/(G+1);
 
-  for (int i = C-1; i != 0; i--) {
+  for (int i = C-1; i != -1; i--) {
       s[i] = index%(B+1);
       index = index/(B+1);
   }

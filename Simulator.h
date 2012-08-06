@@ -8,7 +8,7 @@
 #ifndef SIMULATOR_H_
 #define SIMULATOR_H_
 
-#include <Eigen/Dense>;
+#include <Eigen/Dense>
 
 using namespace Eigen;
 
