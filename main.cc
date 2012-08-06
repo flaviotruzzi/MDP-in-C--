@@ -8,33 +8,56 @@
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
 
 #include <iostream>
+#include <fstream>
 #include "Simulator.h"
 #include <Eigen/Dense>
 #include "MDP.h"
+#include <jsoncpp/json.h>
 
 using namespace std;
 using namespace Eigen;
 
+
 int main(int argc, char **argv) {
 
-  double Pg[] = { 0.3, 0.1, 0.1, 0.25, 0.25};
+	Json::Value root;
+	std::ifstream file("../input.json");
+	file >> root;
 
-  //Simulator a(3,3,500,1000,.4,Pg);
+	int B = atoi(root["B"].toStyledString().c_str());
+	int C = atoi(root["C"].toStyledString().c_str());
+	int G = atoi(root["G"].toStyledString().c_str());
+	int tau = atoi(root["tau"].toStyledString().c_str());
+	int n_means = atoi(root["n_means"].toStyledString().c_str());
+	double prequest = atof(root["Prequest"].toStyledString().c_str());
+	double Pg[G];
 
-  MatrixXf CTR(3,5);
-  CTR << 0.05, 0.50, 0.05, .1, .45,
-         0.80, 0.81, 0.05, .4, .65,
-         0.05, 0.81, 0.80, .7, .44;
+	Json::Value pg;
+	pg = root["Pg"];
 
-  VectorXf CPC(5);
+	for (unsigned int i = 0; i < pg.size(); i++)
+		Pg[i] = atof(pg[i].toStyledString().c_str());
 
-  CPC << 1.0, 1.0, 1.0, 1.0, 1.0;
+	MatrixXf CTR(G,C);
 
-  MDP k(5,3,15,.4,CTR,Pg,CPC);
+	for ( int i = 0; i < G; i++)
+		for (int j = 0; j < C; j++)
+			CTR(i,j) = atof(root["CTR"][i][j].toStyledString().c_str());
 
-  k.PopulateMtx();
-  //k.checkT();
 
-  return 0;
+	VectorXf CPC(C);
+
+	for ( int i = 0; i < C; i++)
+		CPC(i) = atof(root["CPC"][i].toStyledString().c_str());
+
+	Simulator a(C,G,CTR,tau,n_means,prequest,Pg);
+
+	MDP k(C,G,B,tau,prequest,CTR,Pg,CPC);
+
+	k.PopulateMtx();
+	cout << "plan";
+	//k.plan();
+
+	return 0;
 }
 

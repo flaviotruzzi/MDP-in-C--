@@ -11,8 +11,11 @@
 
 using namespace std;
 
-Simulator::Simulator(int C, int G, int tau, int sims, double Prequest, double *Pg) {
+Simulator::Simulator(int C, int G, MatrixXf CTR, int tau, int sims, double Prequest, double *Pg) {
 
+  n_means = sims;
+
+  cout << "Creating Simulation Matrix...";
   srand((unsigned)time(NULL));
 
   this->Pg = new double[G];
@@ -24,9 +27,7 @@ Simulator::Simulator(int C, int G, int tau, int sims, double Prequest, double *P
 
  simulations = new MatrixXd[sims];
 
- CTR << 0.05, 0.50, 0.05,
-       0.80, 0.81, 0.05,
-       0.05, 0.81, 0.80;
+ this->CTR = CTR;
 
  for (int r = 0; r < sims; r++) {
      simulations[r] = MatrixXd(C+1,tau);
@@ -46,7 +47,7 @@ Simulator::Simulator(int C, int G, int tau, int sims, double Prequest, double *P
        simulations[r](C,t) = g;
      }
    }
-
+ cout << "Done!" << endl;
 }
 
 int Simulator::randomWeighted() {

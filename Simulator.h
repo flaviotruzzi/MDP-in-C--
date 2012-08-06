@@ -15,16 +15,18 @@ using namespace Eigen;
 class Simulator
 {
 public:
-  Simulator(int C, int G, int tau, int sims, double Prequest, double *Pg);
+  Simulator(int C, int G, MatrixXf CTR, int tau, int sims, double Prequest, double *Pg);
   int randomWeighted();
   MatrixXd *simulations;
   virtual
   ~Simulator();
+  int n_means;
 
 private:
   double *Pg;
   double Prequest;
-  Matrix3d CTR;
+  MatrixXf CTR;
+
 
 };
 

@@ -14,16 +14,19 @@ using namespace std;
 
 typedef Eigen::Triplet<double> Tr;
 
+VectorXf mult(SparseMatrix<double> first, MatrixXf second);
+VectorXf summ(VectorXf first, SparseVector<double> second);
 
 void print(int *v) {
   cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
 }
 
-MDP::MDP(int C, int G, int B, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC)
+MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC)
 {
   this->C =  C;
   this->G =  G;
   this->B =  B;
+  this->tau = tau;
   this->Prequest = Prequest;
 
   this->CTR = CTR;
@@ -50,7 +53,7 @@ void MDP::PopulateMtx() {
   int *sa =  new int[C+1];
   int *sc =  new int[C+1];
 
-  //cout << "Creating Transation Matrix... " << endl;
+  cout << "Creating Transation and Reward Matrices... ";
 
   for (int a = 0; a < A; a++) {
       T[a] = SparseMatrix<double>(S,S);
@@ -100,11 +103,12 @@ void MDP::PopulateMtx() {
       }
 
       T[a].setFromTriplets(K.begin(),K.end());
+
       T[a].finalize();
 
-      cout << "a:" << a << " " << nonzero << endl;
+      //cout << "a:" << a << " " << nonzero << endl;
   }
-  cout << "Matrix T and R created" << endl;
+  cout << "Done!" << endl;
   delete sa;
   delete sc;
 
@@ -146,8 +150,60 @@ void MDP::getStateOfIndex(long index, int *s) {
 
 }
 
+void MDP::plan() {
+	V = VectorXf(S);
+	//V.setConstant(0.0);
+	policy = MatrixXf(S,tau);
+	Q = MatrixXf(S,A);
+	Q.setConstant(0.0);
+
+	for (int t = 0; t < tau; t++) {
+		for (int a = 0; a < A; a++) {
+			//Q.col(a) = summ(mult(T[a],V),R[a]);
+			V+T[a];
+			//T[a]*V; //T[a].dot(V); //R[a];// + T[a]*(V);
+		}
+	}
+}
+
 MDP::~MDP()
 {
   // TODO Auto-generated destructor stub
 }
+
+VectorXf mult(SparseMatrix<double> first, MatrixXf second) {
+	VectorXf output(first.rows());
+	for (int c = 0; c < first.rows(); c++) {
+		double sum = 0;
+		for (int d = 0; d < second.cols(); d++) {
+			for (int k = 0; k < first.cols(); k++) {
+				sum += double(first.coeff(c,k)) * double(second(k,d));
+			}
+		}
+		output(c) = sum;
+	}
+	return output;
+}
+
+
+VectorXf summ(VectorXf first, SparseVector<double> second) {
+	VectorXf output(first.rows());
+	for (int i = 0; i < first.rows(); i++) {
+		first(i) = first.coeff(i)+second.coeff(i);
+	}
+	return output;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
