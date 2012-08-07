@@ -25,12 +25,12 @@ Simulator::Simulator(int C, int G, MatrixXf CTR, int tau, int sims, double Prequ
   for (int i = 0; i < 3; i++)
     this->Pg[i] = Pg[i];
 
- simulations = new MatrixXd[sims];
+ simulations = new MatrixXf[sims];
 
  this->CTR = CTR;
 
  for (int r = 0; r < sims; r++) {
-     simulations[r] = MatrixXd(C+1,tau);
+     simulations[r] = MatrixXf(C+1,tau);
      for (int t = 0; t < tau; t++) {
        int g = randomWeighted();
        if (! ((double(rand())/RAND_MAX) < Prequest))

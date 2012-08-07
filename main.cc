@@ -55,8 +55,9 @@ int main(int argc, char **argv) {
 	MDP k(C,G,B,tau,prequest,CTR,Pg,CPC);
 
 	k.PopulateMtx();
-	cout << "plan";
-	//k.plan();
+	k.ValueIteration();
+
+
 
 	return 0;
 }

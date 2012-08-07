@@ -20,7 +20,7 @@ public:
   MDP(int C, int G, int B, int tau, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC);
   void getStateOfIndex(long index, int *s);
   void PopulateMtx();
-  void plan();
+  void ValueIteration();
   int getIndexOfState(int *s);
   int checkT();
 
@@ -38,11 +38,11 @@ private:
   MatrixXf CTR;
   double *Pg;
   VectorXf CPC;
-  MatrixXf V;
+  VectorXf V;
   MatrixXf Q;
-  MatrixXf policy;
-  SparseMatrix<double> *T;
-  SparseVector<double> *R;
+  MatrixXi policy;
+  SparseMatrix<float> *T;
+  SparseMatrix<float> *R;
   double Prequest;
 };
 

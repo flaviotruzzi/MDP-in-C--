@@ -38,8 +38,8 @@ MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXf CTR, double Pg[
   S = (long)(pow(int(B+1),double(C))*(G+1));
   A = C+1;
 
-  T = new SparseMatrix<double>[A];
-  R = new SparseVector<double>[A];
+  T = new SparseMatrix<float>[A];
+  R = new SparseMatrix<float>[A];
 
   eCPI = CTR.cwiseProduct(CPC.transpose().replicate(G,1));
 
@@ -53,15 +53,17 @@ void MDP::PopulateMtx() {
   cout << "Creating Transation and Reward Matrices... ";
 
   for (int a = 0; a < A; a++) {
-      T[a] = SparseMatrix<double>(S,S);
-      R[a] = SparseVector<double>(S);
+      T[a] = SparseMatrix<float>(S,S);
+      R[a] = SparseMatrix<float>(S,1);
 
 
       R[a].reserve(600000);
 
       int nonzero = 0;
       std::vector<Tr> K;
+      std::vector<Tr> Kr;
       K.reserve(600000);
+      Kr.reserve(600000);
 
       for (int s = 0; s < S; s++) {
           getStateOfIndex(s,sa);
@@ -87,7 +89,7 @@ void MDP::PopulateMtx() {
 
                   K.push_back(Tr(s,getIndexOfState(sc),PI*CTR(sa[C]-1,a-1)));
 
-                  R[a].insert(s) = eCPI(sa[C]-1,a-1);
+                  Kr.push_back(Tr(s,0,eCPI(sa[C]-1,a-1)));
 
                   nonzero = nonzero +2;
               } else {
@@ -100,7 +102,8 @@ void MDP::PopulateMtx() {
       }
 
       T[a].setFromTriplets(K.begin(),K.end());
-
+      R[a].setFromTriplets(Kr.begin(),Kr.end());
+      R[a].finalize();
       T[a].finalize();
 
       //cout << "a:" << a << " " << nonzero << endl;
@@ -147,18 +150,25 @@ void MDP::getStateOfIndex(long index, int *s) {
 
 }
 
-void MDP::plan() {
-	/*   V = MatrixXf(S,1);
-   V.setConstant(0.0);
-   policy = MatrixXf(S,tau);
+void MDP::ValueIteration() {
+   V = VectorXf(S);
+  // V.setConstant(0.0);
+   policy = MatrixXi(S,tau);
    Q = MatrixXf(S,A);
    Q.setConstant(0.0);
 
    for (int t = 0; t < tau; t++) {
       for (int a = 0; a < A; a++) {
-         Q.col(a) = R[a] + T[a]*(V);
+         Q.col(a) = T[a]*V;
+         Q.col(a) += R[a];
       }
-   }*/
+      V = Q.rowwise().maxCoeff();
+      for (int s = 0; s < S; s++) {
+    	  int k;
+    	  Q.row(s).maxCoeff(&k);
+    	  policy(s,t) = k;
+      }
+   }
 }
 
 MDP::~MDP()

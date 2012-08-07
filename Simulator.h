@@ -17,7 +17,7 @@ class Simulator
 public:
   Simulator(int C, int G, MatrixXf CTR, int tau, int sims, double Prequest, double *Pg);
   int randomWeighted();
-  MatrixXd *simulations;
+  MatrixXf *simulations;
   virtual
   ~Simulator();
   int n_means;
