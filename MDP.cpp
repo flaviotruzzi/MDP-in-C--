@@ -18,7 +18,7 @@ void print(int *v) {
   cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
 }
 
-MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXf CTR, double Pg[], VectorXf CPC)
+MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[], VectorXd CPC)
 {
   this->C =  C;
   this->G =  G;
@@ -38,8 +38,8 @@ MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXf CTR, double Pg[
   S = (long)(pow(int(B+1),double(C))*(G+1));
   A = C+1;
 
-  T = new SparseMatrix<float>[A];
-  R = new SparseMatrix<float>[A];
+  T = new SparseMatrix<double>[A];
+  R = new SparseMatrix<double>[A];
 
   eCPI = CTR.cwiseProduct(CPC.transpose().replicate(G,1));
 
@@ -53,8 +53,8 @@ void MDP::PopulateMtx() {
   cout << "Creating Transation and Reward Matrices... ";
 
   for (int a = 0; a < A; a++) {
-      T[a] = SparseMatrix<float>(S,S);
-      R[a] = SparseMatrix<float>(S,1);
+      T[a] = SparseMatrix<double>(S,S);
+      R[a] = SparseMatrix<double>(S,1);
 
 
       R[a].reserve(600000);
@@ -116,12 +116,76 @@ void MDP::PopulateMtx() {
 
 int MDP::checkT() {
   int result = 0;
-  int l[] = {0,10,10,3};
-  cout << getIndexOfState(l) << endl;
-  cout << T[0].coeff(483,480) << " ";
-  cout << T[0].coeff(483,481) << " ";
-  cout << T[0].coeff(483,482) << " ";
-  cout << T[0].coeff(483,483) << " " << endl;
+
+  cout << T[1].coeff(5307,4821)<< "    0.0100"<< endl;
+  cout << T[1].coeff(4820,4822)<< "    0.1000"<< endl;
+  cout << T[1].coeff(4821,4822)<< "    0.0950"<< endl;
+  cout << T[1].coeff(4822,4822)<< "    0.0200"<< endl;
+  cout << T[1].coeff(4823,4822)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5305,4822)<< "    0.0050"<< endl;
+  cout << T[1].coeff(5306,4822)<< "    0.0800"<< endl;
+  cout << T[1].coeff(5307,4822)<< "    0.0050"<< endl;
+  cout << T[1].coeff(4820,4823)<< "    0.1000"<< endl;
+  cout << T[1].coeff(4821,4823)<< "    0.0950"<< endl;
+  cout << T[1].coeff(4822,4823)<< "    0.0200"<< endl;
+  cout << T[1].coeff(4823,4823)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5305,4823)<< "    0.0050"<< endl;
+  cout << T[1].coeff(5306,4823)<< "    0.0800"<< endl;
+  cout << T[1].coeff(5307,4823)<< "    0.0050"<< endl;
+  cout << T[1].coeff(4824,4824)<< "    0.6000"<< endl;
+  cout << T[1].coeff(4825,4824)<< "    0.5700"<< endl;
+  cout << T[1].coeff(4826,4824)<< "    0.1200"<< endl;
+  cout << T[1].coeff(4827,4824)<< "    0.5700"<< endl;
+  cout << T[1].coeff(5309,4824)<< "    0.0300"<< endl;
+  cout << T[1].coeff(5310,4824)<< "    0.4800"<< endl;
+  cout << T[1].coeff(5311,4824)<< "    0.0300"<< endl;
+  cout << T[1].coeff(4824,4825)<< "    0.2000"<< endl;
+  cout << T[1].coeff(4825,4825)<< "    0.1900"<< endl;
+  cout << T[1].coeff(4826,4825)<< "    0.0400"<< endl;
+  cout << T[1].coeff(4827,4825)<< "    0.1900"<< endl;
+  cout << T[1].coeff(5309,4825)<< "    0.0100"<< endl;
+  cout << T[1].coeff(5310,4825)<< "    0.1600"<< endl;
+  cout << T[1].coeff(5311,4825)<< "    0.0100"<< endl;
+  cout << T[1].coeff(4824,4826)<< "    0.1000"<< endl;
+  cout << T[1].coeff(4825,4826)<< "    0.0950"<< endl;
+  cout << T[1].coeff(4826,4826)<< "    0.0200"<< endl;
+  cout << T[1].coeff(4827,4826)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5309,4826)<< "    0.0050"<< endl;
+  cout << T[1].coeff(5310,4826)<< "    0.0800"<< endl;
+  cout << T[1].coeff(5311,4826)<< "    0.0050"<< endl;
+  cout << T[1].coeff(4824,4827)<< "    0.1000"<< endl;
+
+  cout << T[1].coeff(5318,5316)<< "    0.1200"<< endl;
+  cout << T[1].coeff(5319,5316)<< "    0.5700"<< endl;
+  cout << T[1].coeff(5316,5317)<< "    0.2000"<< endl;
+  cout << T[1].coeff(5317,5317)<< "    0.1900"<< endl;
+  cout << T[1].coeff(5318,5317)<< "    0.0400"<< endl;
+  cout << T[1].coeff(5319,5317)<< "    0.1900"<< endl;
+  cout << T[1].coeff(5316,5318)<< "    0.1000"<< endl;
+  cout << T[1].coeff(5317,5318)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5318,5318)<< "    0.0200"<< endl;
+  cout << T[1].coeff(5319,5318)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5316,5319)<< "    0.1000"<< endl;
+  cout << T[1].coeff(5317,5319)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5318,5319)<< "    0.0200"<< endl;
+  cout << T[1].coeff(5319,5319)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5320,5320)<< "    0.6000"<< endl;
+  cout << T[1].coeff(5321,5320)<< "    0.5700"<< endl;
+  cout << T[1].coeff(5322,5320)<< "    0.1200"<< endl;
+  cout << T[1].coeff(5323,5320)<< "    0.5700"<< endl;
+  cout << T[1].coeff(5320,5321)<< "    0.2000"<< endl;
+  cout << T[1].coeff(5321,5321)<< "    0.1900"<< endl;
+  cout << T[1].coeff(5322,5321)<< "    0.0400"<< endl;
+  cout << T[1].coeff(5323,5321)<< "    0.1900"<< endl;
+  cout << T[1].coeff(5320,5322)<< "    0.1000"<< endl;
+  cout << T[1].coeff(5321,5322)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5322,5322)<< "    0.0200"<< endl;
+  cout << T[1].coeff(5323,5322)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5320,5323)<< "    0.1000"<< endl;
+  cout << T[1].coeff(5321,5323)<< "    0.0950"<< endl;
+  cout << T[1].coeff(5322,5323)<< "    0.0200"<< endl;
+  cout << T[1].coeff(5323,5323)<< "    0.0950"<< endl;
+
 
   return result;
 }
@@ -153,10 +217,10 @@ void MDP::getStateOfIndex(long index, int *s) {
 void MDP::ValueIteration() {
    cout << "Running Value Iteration	";
    cout.flush();
-   V = MatrixXf(S,1);
-  // V.setConstant(0.0);
+   V = MatrixXd(S,1);
+   V.setConstant(0.0);
    policy = MatrixXi(S,tau);
-   Q = MatrixXf(S,A);
+   Q = MatrixXd(S,A);
    Q.setConstant(0.0);
    	   int counter = 0;
    for (int t = 0; t < tau; t++) {
@@ -165,11 +229,11 @@ void MDP::ValueIteration() {
          Q.col(a) += R[a];
       }
       V = Q.rowwise().maxCoeff();
-      //for (int s = 0; s < S; s++) {
-    //	  int k;
-    //	  Q.row(s).maxCoeff(&k);
-    //	  policy(s,t) = k;
-     // }
+      for (int s = 0; s < S; s++) {
+    	  int k;
+    	  Q.row(s).maxCoeff(&k);
+    	  policy(s,t) = k;
+      }
       if (t/100 == counter) {
     	  counter++;
     	  cout << ".";
@@ -178,6 +242,11 @@ void MDP::ValueIteration() {
    }
    cout << "Done" << endl;
 }
+
+int MDP::getAction(long index, int t) {
+	return policy(index,t);
+}
+
 
 MDP::~MDP()
 {

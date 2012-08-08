@@ -9,23 +9,32 @@
 #define SIMULATOR_H_
 
 #include <Eigen/Dense>
+#include "MDP.h"
 
 using namespace Eigen;
 
 class Simulator
 {
 public:
-  Simulator(int C, int G, MatrixXf CTR, int tau, int sims, double Prequest, double *Pg);
+  Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, int sims, double Prequest, double *Pg, MDP *mdp);
   int randomWeighted();
-  MatrixXf *simulations;
-  virtual
-  ~Simulator();
+  MatrixXd *simulations;
+  virtual  ~Simulator();
   int n_means;
-
+  void Simulate();
+  MatrixXd values;
 private:
   double *Pg;
   double Prequest;
-  MatrixXf CTR;
+  int tau;
+  int C;
+  MatrixXd CTR;
+  MatrixXd CPC;
+
+  MDP *mdp;
+  int B;
+  int G;
+
 
 
 };

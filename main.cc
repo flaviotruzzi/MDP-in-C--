@@ -38,27 +38,40 @@ int main(int argc, char **argv) {
 	for (unsigned int i = 0; i < pg.size(); i++)
 		Pg[i] = atof(pg[i].toStyledString().c_str());
 
-	MatrixXf CTR(G,C);
+	MatrixXd CTR(G,C);
 
 	for ( int i = 0; i < G; i++)
 		for (int j = 0; j < C; j++)
 			CTR(i,j) = atof(root["CTR"][i][j].toStyledString().c_str());
 
 
-	VectorXf CPC(C);
+	VectorXd CPC(C);
 
 	for ( int i = 0; i < C; i++)
 		CPC(i) = atof(root["CPC"][i].toStyledString().c_str());
 
-	Simulator a(C,G,CTR,tau,n_means,prequest,Pg);
+
 
 	MDP k(C,G,B,tau,prequest,CTR,Pg,CPC);
 
+
 	k.PopulateMtx();
+
+	//k.checkT();
+
 	k.ValueIteration();
+/*
+	Simulator a(C,G,B,CTR,CPC,tau,n_means,prequest,Pg,&k);
+	a.Simulate();
 
-	ofstream policy;
+	ofstream policy("policy.mtx");
+	policy << k.policy;
+	policy.close();
 
+	ofstream output("simulated.mtx");
+	output << a.values;
+	output.close();
+*/
 	return 0;
 }
 
