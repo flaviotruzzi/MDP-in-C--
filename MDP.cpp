@@ -151,24 +151,32 @@ void MDP::getStateOfIndex(long index, int *s) {
 }
 
 void MDP::ValueIteration() {
-   V = VectorXf(S);
+   cout << "Running Value Iteration	";
+   cout.flush();
+   V = MatrixXf(S,1);
   // V.setConstant(0.0);
    policy = MatrixXi(S,tau);
    Q = MatrixXf(S,A);
    Q.setConstant(0.0);
-
+   	   int counter = 0;
    for (int t = 0; t < tau; t++) {
       for (int a = 0; a < A; a++) {
          Q.col(a) = T[a]*V;
          Q.col(a) += R[a];
       }
       V = Q.rowwise().maxCoeff();
-      for (int s = 0; s < S; s++) {
-    	  int k;
-    	  Q.row(s).maxCoeff(&k);
-    	  policy(s,t) = k;
+      //for (int s = 0; s < S; s++) {
+    //	  int k;
+    //	  Q.row(s).maxCoeff(&k);
+    //	  policy(s,t) = k;
+     // }
+      if (t/100 == counter) {
+    	  counter++;
+    	  cout << ".";
+    	  cout.flush();
       }
    }
+   cout << "Done" << endl;
 }
 
 MDP::~MDP()

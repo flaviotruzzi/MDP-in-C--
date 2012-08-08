@@ -23,7 +23,7 @@ public:
   void ValueIteration();
   int getIndexOfState(int *s);
   int checkT();
-
+  MatrixXi policy;
   virtual
   ~MDP();
 
@@ -38,9 +38,8 @@ private:
   MatrixXf CTR;
   double *Pg;
   VectorXf CPC;
-  VectorXf V;
+  MatrixXf V;
   MatrixXf Q;
-  MatrixXi policy;
   SparseMatrix<float> *T;
   SparseMatrix<float> *R;
   double Prequest;

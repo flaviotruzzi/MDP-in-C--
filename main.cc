@@ -19,7 +19,7 @@ using namespace Eigen;
 
 
 int main(int argc, char **argv) {
-
+	setNbThreads(3);
 	Json::Value root;
 	std::ifstream file("../input.json");
 	file >> root;
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 	k.PopulateMtx();
 	k.ValueIteration();
 
-
+	ofstream policy;
 
 	return 0;
 }
