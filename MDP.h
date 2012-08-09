@@ -26,6 +26,8 @@ public:
   int checkT();
   MatrixXi policy;
   SparseMatrix<double> *T;
+  MatrixXd *R;
+  MatrixXd V;
   virtual
   ~MDP();
 
@@ -40,10 +42,10 @@ private:
   MatrixXd CTR;
   double *Pg;
   VectorXd CPC;
-  MatrixXd V;
+
   MatrixXd Q;
   //SparseMatrix<double> *T;
-  SparseMatrix<double> *R;
+//  SparseMatrix<double> *R;
   double Prequest;
 };
 

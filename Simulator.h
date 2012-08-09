@@ -10,15 +10,17 @@
 
 #include <Eigen/Dense>
 #include "MDP.h"
+#include <random>
 
 using namespace Eigen;
+using namespace std;
 
 class Simulator
 {
 public:
   Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, int sims, double Prequest, double *Pg, MDP *mdp);
   int randomWeighted();
-  MatrixXd *simulations;
+  MatrixXi *simulations;
   virtual  ~Simulator();
   int n_means;
   void Simulate();
@@ -30,7 +32,8 @@ private:
   int C;
   MatrixXd CTR;
   MatrixXd CPC;
-
+  default_random_engine generator;
+  bernoulli_distribution distribution;
   MDP *mdp;
   int B;
   int G;

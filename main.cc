@@ -57,21 +57,38 @@ int main(int argc, char **argv) {
 
 	k.PopulateMtx();
 
-	//k.checkT();
-
 	k.ValueIteration();
-/*
+
 	Simulator a(C,G,B,CTR,CPC,tau,n_means,prequest,Pg,&k);
 	a.Simulate();
+
+	ofstream sim("sim.mtx");
+	sim << k.V;
+	sim.close();
 
 	ofstream policy("policy.mtx");
 	policy << k.policy;
 	policy.close();
 
-	ofstream output("simulated.mtx");
-	output << a.values;
-	output.close();
-*/
+	ofstream t0("t0.mtx");
+	t0 << k.T[0].toDense();
+	t0.close();
+
+	ofstream t1("t1.mtx");
+	t1 << k.T[1].toDense();
+	t1.close();
+
+	ofstream t2("t0.mtx");
+	t2 << k.T[2].toDense();
+	t2.close();
+
+	ofstream t3("t0.mtx");
+	t3 << k.T[3].toDense();
+	t3.close();
+
+
+
+
 	return 0;
 }
 

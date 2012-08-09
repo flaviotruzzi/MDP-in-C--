@@ -17,7 +17,7 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
   n_means = sims;
 
   cout << "Creating Simulation Matrix...";
-  srand((unsigned)time(NULL));
+  srand((unsigned)time(0));
 
   this->mdp = mdp;
   this->Pg = new double[G];
@@ -27,20 +27,22 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
   this->B = B;
   this->Prequest = Prequest;
   this->CPC = CPC;
-
-  for (int i = 0; i < 3; i++)
+  distribution = bernoulli_distribution(Prequest);
+  for (int i = 0; i < G; i++)
     this->Pg[i] = Pg[i];
 
- simulations = new MatrixXd[sims];
+  for (int i = 1; i < G; i++) {
+	  this->Pg[i] = this->Pg[i] + this->Pg[i-1];
+  }
+
+ simulations = new MatrixXi[sims];
 
  this->CTR = CTR;
 
  for (int r = 0; r < sims; r++) {
-     simulations[r] = MatrixXd(C+1,tau);
+     simulations[r] = MatrixXi(C+1,tau);
      for (int t = 0; t < tau; t++) {
        int g = randomWeighted();
-       if (! ((double(rand())/RAND_MAX) < Prequest))
-         g = 0;
        if (g > 0) {
          for (int c = 0; c < C; c++) {
            double rnd = double(rand())/RAND_MAX;
@@ -58,11 +60,9 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
 
 int Simulator::randomWeighted() {
 
-  default_random_engine generator;
-  bernoulli_distribution distribution(Prequest);
   double rnd = double(rand())/RAND_MAX;
-  if (distribution(generator)) {
-      for (int i = 0; i < 3; i++) {
+  if (distribution(generator) == true) {
+      for (int i = 0; i < G; i++) {
           if (rnd < Pg[i])
             return i+1;
       }
@@ -71,20 +71,31 @@ int Simulator::randomWeighted() {
 }
 
 
+void printState(int *s, int C) {
+	cout << "[";
+	for (int i = 0; i < C+1; i++)
+		cout << s[i] << " ";
+	cout << "]";
+}
+
 void Simulator::Simulate() {
 	cout << "Simulating...";
 	values = MatrixXd(n_means,tau);
+	values.setConstant(0.0);
 	for (int r = 0; r < n_means; r++) {
 		int s[C+1];
 		for (int si = 0; si < C; si++)
 			s[si] = B;
 		s[C] = 0;
 		for (int t = 0; t < tau; t++) {
-			int g = simulations[r](C,t);
+			int g = simulations[r](C,t); // teve requisição!?
+			s[C] = g;
 			int c = mdp->getAction(mdp->getIndexOfState(s),t);
-			if ((g > 0) && (c > 0) && (simulations[r](c,t) > 0) && (s[c] > 0)) {
-				s[c] = s[c] -1;
-				values(r,t) = simulations[r](c,t)*CPC(c);
+			if ((g>0) && (c>0) && (s[c-1] > 0) && (simulations[r](c-1,t) > 0)) {
+				values(r,t) = simulations[r](c-1,t)*CPC(c-1);
+				cout << "t: " << t << " "; printState(s,C);
+				cout << " " << "index:" << mdp->getIndexOfState(s) << " ação:" << c << endl;
+				s[c-1] = s[c-1] -1;
 			}
 		}
 	}

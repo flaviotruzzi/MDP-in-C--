@@ -18,6 +18,14 @@ void print(int *v) {
   cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
 }
 
+template<typename T>
+    void removeDuplicates(std::vector<T>& vec)
+    {
+        std::sort(vec.begin(), vec.end());
+        vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+}
+
+
 MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[], VectorXd CPC)
 {
   this->C =  C;
@@ -39,7 +47,7 @@ MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[
   A = C+1;
 
   T = new SparseMatrix<double>[A];
-  R = new SparseMatrix<double>[A];
+  R = new MatrixXd[A];
 
   eCPI = CTR.cwiseProduct(CPC.transpose().replicate(G,1));
 
@@ -54,16 +62,14 @@ void MDP::PopulateMtx() {
 
   for (int a = 0; a < A; a++) {
       T[a] = SparseMatrix<double>(S,S);
-      R[a] = SparseMatrix<double>(S,1);
+      R[a] = MatrixXd(S,1);
 
-
-      R[a].reserve(600000);
 
       int nonzero = 0;
       std::vector<Tr> K;
-      std::vector<Tr> Kr;
+      std::map<std::pair<unsigned long, unsigned long>, bool> Kmap;
+
       K.reserve(600000);
-      Kr.reserve(600000);
 
       for (int s = 0; s < S; s++) {
           getStateOfIndex(s,sa);
@@ -82,6 +88,7 @@ void MDP::PopulateMtx() {
                 PI = Prequest*Pg[g-1];
 
               if ( (a != 0) && (sa[C] > 0) && (sa[a-1] > 0)) {
+            	  Tr a;
 
             	  K.push_back(Tr(s,getIndexOfState(sc),PI*(1-CTR(sa[C]-1,a-1))));
 
@@ -89,7 +96,7 @@ void MDP::PopulateMtx() {
 
                   K.push_back(Tr(s,getIndexOfState(sc),PI*CTR(sa[C]-1,a-1)));
 
-                  Kr.push_back(Tr(s,0,eCPI(sa[C]-1,a-1)));
+                  R[a].coeffRef(s,0) = eCPI(sa[C]-1,a-1);
 
                   nonzero = nonzero +2;
               } else {
@@ -100,10 +107,10 @@ void MDP::PopulateMtx() {
 
           }
       }
+      //removeDuplicates(K);
+      //T[a].setFromTriplets(K.begin(),K.end());
 
-      T[a].setFromTriplets(K.begin(),K.end());
-      R[a].setFromTriplets(Kr.begin(),Kr.end());
-      R[a].finalize();
+
       T[a].finalize();
 
       //cout << "a:" << a << " " << nonzero << endl;
@@ -115,79 +122,7 @@ void MDP::PopulateMtx() {
 }
 
 int MDP::checkT() {
-  int result = 0;
 
-  cout << T[1].coeff(5307,4821)<< "    0.0100"<< endl;
-  cout << T[1].coeff(4820,4822)<< "    0.1000"<< endl;
-  cout << T[1].coeff(4821,4822)<< "    0.0950"<< endl;
-  cout << T[1].coeff(4822,4822)<< "    0.0200"<< endl;
-  cout << T[1].coeff(4823,4822)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5305,4822)<< "    0.0050"<< endl;
-  cout << T[1].coeff(5306,4822)<< "    0.0800"<< endl;
-  cout << T[1].coeff(5307,4822)<< "    0.0050"<< endl;
-  cout << T[1].coeff(4820,4823)<< "    0.1000"<< endl;
-  cout << T[1].coeff(4821,4823)<< "    0.0950"<< endl;
-  cout << T[1].coeff(4822,4823)<< "    0.0200"<< endl;
-  cout << T[1].coeff(4823,4823)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5305,4823)<< "    0.0050"<< endl;
-  cout << T[1].coeff(5306,4823)<< "    0.0800"<< endl;
-  cout << T[1].coeff(5307,4823)<< "    0.0050"<< endl;
-  cout << T[1].coeff(4824,4824)<< "    0.6000"<< endl;
-  cout << T[1].coeff(4825,4824)<< "    0.5700"<< endl;
-  cout << T[1].coeff(4826,4824)<< "    0.1200"<< endl;
-  cout << T[1].coeff(4827,4824)<< "    0.5700"<< endl;
-  cout << T[1].coeff(5309,4824)<< "    0.0300"<< endl;
-  cout << T[1].coeff(5310,4824)<< "    0.4800"<< endl;
-  cout << T[1].coeff(5311,4824)<< "    0.0300"<< endl;
-  cout << T[1].coeff(4824,4825)<< "    0.2000"<< endl;
-  cout << T[1].coeff(4825,4825)<< "    0.1900"<< endl;
-  cout << T[1].coeff(4826,4825)<< "    0.0400"<< endl;
-  cout << T[1].coeff(4827,4825)<< "    0.1900"<< endl;
-  cout << T[1].coeff(5309,4825)<< "    0.0100"<< endl;
-  cout << T[1].coeff(5310,4825)<< "    0.1600"<< endl;
-  cout << T[1].coeff(5311,4825)<< "    0.0100"<< endl;
-  cout << T[1].coeff(4824,4826)<< "    0.1000"<< endl;
-  cout << T[1].coeff(4825,4826)<< "    0.0950"<< endl;
-  cout << T[1].coeff(4826,4826)<< "    0.0200"<< endl;
-  cout << T[1].coeff(4827,4826)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5309,4826)<< "    0.0050"<< endl;
-  cout << T[1].coeff(5310,4826)<< "    0.0800"<< endl;
-  cout << T[1].coeff(5311,4826)<< "    0.0050"<< endl;
-  cout << T[1].coeff(4824,4827)<< "    0.1000"<< endl;
-
-  cout << T[1].coeff(5318,5316)<< "    0.1200"<< endl;
-  cout << T[1].coeff(5319,5316)<< "    0.5700"<< endl;
-  cout << T[1].coeff(5316,5317)<< "    0.2000"<< endl;
-  cout << T[1].coeff(5317,5317)<< "    0.1900"<< endl;
-  cout << T[1].coeff(5318,5317)<< "    0.0400"<< endl;
-  cout << T[1].coeff(5319,5317)<< "    0.1900"<< endl;
-  cout << T[1].coeff(5316,5318)<< "    0.1000"<< endl;
-  cout << T[1].coeff(5317,5318)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5318,5318)<< "    0.0200"<< endl;
-  cout << T[1].coeff(5319,5318)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5316,5319)<< "    0.1000"<< endl;
-  cout << T[1].coeff(5317,5319)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5318,5319)<< "    0.0200"<< endl;
-  cout << T[1].coeff(5319,5319)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5320,5320)<< "    0.6000"<< endl;
-  cout << T[1].coeff(5321,5320)<< "    0.5700"<< endl;
-  cout << T[1].coeff(5322,5320)<< "    0.1200"<< endl;
-  cout << T[1].coeff(5323,5320)<< "    0.5700"<< endl;
-  cout << T[1].coeff(5320,5321)<< "    0.2000"<< endl;
-  cout << T[1].coeff(5321,5321)<< "    0.1900"<< endl;
-  cout << T[1].coeff(5322,5321)<< "    0.0400"<< endl;
-  cout << T[1].coeff(5323,5321)<< "    0.1900"<< endl;
-  cout << T[1].coeff(5320,5322)<< "    0.1000"<< endl;
-  cout << T[1].coeff(5321,5322)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5322,5322)<< "    0.0200"<< endl;
-  cout << T[1].coeff(5323,5322)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5320,5323)<< "    0.1000"<< endl;
-  cout << T[1].coeff(5321,5323)<< "    0.0950"<< endl;
-  cout << T[1].coeff(5322,5323)<< "    0.0200"<< endl;
-  cout << T[1].coeff(5323,5323)<< "    0.0950"<< endl;
-
-
-  return result;
 }
 
 int MDP::getIndexOfState(int *s) {
@@ -225,8 +160,8 @@ void MDP::ValueIteration() {
    	   int counter = 0;
    for (int t = 0; t < tau; t++) {
       for (int a = 0; a < A; a++) {
-         Q.col(a) = T[a]*V;
-         Q.col(a) += R[a];
+         Q.col(a) = R[a] + T[a]*V;
+         //Q.col(a) += R[a];
       }
       V = Q.rowwise().maxCoeff();
       for (int s = 0; s < S; s++) {
