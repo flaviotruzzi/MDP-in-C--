@@ -28,6 +28,7 @@ public:
   SparseMatrix<double> *T;
   MatrixXd *R;
   MatrixXd V;
+  MatrixXd eCPI;
   virtual
   ~MDP();
 
@@ -38,7 +39,7 @@ private:
   int A;
   int B;
   int tau;
-  MatrixXd eCPI;
+
   MatrixXd CTR;
   double *Pg;
   VectorXd CPC;

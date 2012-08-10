@@ -13,17 +13,7 @@
 using namespace std;
 
 typedef Eigen::Triplet<double> Tr;
-
-void print(int *v) {
-  cout << "[" << v[0] << " " << v[1] << " " << v[2] << " "<< v[3] << "]" << endl;
-}
-
-template<typename T>
-    void removeDuplicates(std::vector<T>& vec)
-    {
-        std::sort(vec.begin(), vec.end());
-        vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
-}
+typedef std::pair<unsigned long, unsigned long> MyTr;
 
 
 MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[], VectorXd CPC)
@@ -66,8 +56,9 @@ void MDP::PopulateMtx() {
 
 
       int nonzero = 0;
+      int refused = 0;
       std::vector<Tr> K;
-      std::map<std::pair<unsigned long, unsigned long>, bool> Kmap;
+      std::map<MyTr, bool> Kmap;
 
       K.reserve(600000);
 
@@ -88,32 +79,43 @@ void MDP::PopulateMtx() {
                 PI = Prequest*Pg[g-1];
 
               if ( (a != 0) && (sa[C] > 0) && (sa[a-1] > 0)) {
-            	  Tr a;
 
-            	  K.push_back(Tr(s,getIndexOfState(sc),PI*(1-CTR(sa[C]-1,a-1))));
+            	  if ( Kmap.find(MyTr(s,getIndexOfState(sc))) == Kmap.end()) {
+            		  K.push_back(Tr(s,getIndexOfState(sc),PI*(1-CTR((sa[C]-1),a-1))));
+            		  Kmap[MyTr(s,getIndexOfState(sc))] = true;
+            		  R[a].coeffRef(s,0) = eCPI(sa[C]-1,a-1);
+                      nonzero = nonzero +2;
+            	  } else {
+            		  refused++;
+            	  }
 
                   sc[a-1] = sc[a-1]-1;
 
-                  K.push_back(Tr(s,getIndexOfState(sc),PI*CTR(sa[C]-1,a-1)));
+            	  if ( Kmap.find(MyTr(s,getIndexOfState(sc))) == Kmap.end()) {
+            		  K.push_back(Tr(s,getIndexOfState(sc),PI*(CTR((sa[C]-1),a-1))));
+            		  Kmap[MyTr(s,getIndexOfState(sc))] = true;
+            	  } else {
+            		  refused++;
+            	  }
 
-                  R[a].coeffRef(s,0) = eCPI(sa[C]-1,a-1);
 
-                  nonzero = nonzero +2;
               } else {
-                  nonzero++;
 
-                  K.push_back(Tr(s,getIndexOfState(sc),PI));
+            	  if ( Kmap.find(MyTr(s,getIndexOfState(sc))) == Kmap.end()) {
+            		  K.push_back(Tr(s,getIndexOfState(sc),PI));
+            		  Kmap[MyTr(s,getIndexOfState(sc))] = true;
+            		  nonzero++;
+            	  }
+
               }
 
           }
       }
-      //removeDuplicates(K);
-      //T[a].setFromTriplets(K.begin(),K.end());
+      T[a].setFromTriplets(K.begin(),K.end());
 
 
       T[a].finalize();
 
-      //cout << "a:" << a << " " << nonzero << endl;
   }
   cout << "Done!" << endl;
   delete sa;

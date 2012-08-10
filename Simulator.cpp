@@ -42,7 +42,7 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
  for (int r = 0; r < sims; r++) {
      simulations[r] = MatrixXi(C+1,tau);
      for (int t = 0; t < tau; t++) {
-       int g = randomWeighted();
+    	 int g = randomWeighted();
        if (g > 0) {
          for (int c = 0; c < C; c++) {
            double rnd = double(rand())/RAND_MAX;
