@@ -9,24 +9,23 @@
 
 #include <math.h>
 #include <iostream>
-
+#include <fstream>
 using namespace std;
 
 typedef Eigen::Triplet<double> Tr;
 typedef std::pair<unsigned long, unsigned long> MyTr;
 
 
-MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[], VectorXd CPC)
+MDP::MDP(int C, int G, int B, int tau, MYTYPE Prequest, MatrixXld CTR, MYTYPE Pg[], VectorXld CPC)
 {
   this->C =  C;
   this->G =  G;
   this->B =  B;
   this->tau = tau;
   this->Prequest = Prequest;
-
   this->CTR = CTR;
 
-  this->Pg = new double[G];
+  this->Pg = new MYTYPE[G];
 
   for (int i = 0; i < G; i++)
     this->Pg[i] = Pg[i];
@@ -35,9 +34,9 @@ MDP::MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double Pg[
 
   S = (long)(pow(int(B+1),double(C))*(G+1));
   A = C+1;
-
-  T = new SparseMatrix<double>[A];
-  R = new MatrixXd[A];
+  cout << "S:" << S << endl;
+  T = new SparseMatrix<MYTYPE>[A];
+  R = new MatrixXld[A];
 
   eCPI = CTR.cwiseProduct(CPC.transpose().replicate(G,1));
 
@@ -51,8 +50,8 @@ void MDP::PopulateMtx() {
   cout << "Creating Transation and Reward Matrices... ";
 
   for (int a = 0; a < A; a++) {
-      T[a] = SparseMatrix<double>(S,S);
-      R[a] = MatrixXd(S,1);
+      T[a] = SparseMatrix<MYTYPE>(S,S);
+      R[a] = MatrixXld(S,1);
 
 
       int nonzero = 0;
@@ -154,22 +153,29 @@ void MDP::getStateOfIndex(long index, int *s) {
 void MDP::ValueIteration() {
    cout << "Running Value Iteration	";
    cout.flush();
-   V = MatrixXd(S,1);
+   V = MatrixXld(S,1);
    V.setConstant(0.0);
    policy = MatrixXi(S,tau);
-   Q = MatrixXd(S,A);
+   Q = MatrixXld(S,A);
    Q.setConstant(0.0);
-   	   int counter = 0;
+   int counter = 0;
    for (int t = 0; t < tau; t++) {
       for (int a = 0; a < A; a++) {
          Q.col(a) = R[a] + T[a]*V;
          //Q.col(a) += R[a];
       }
+      if (t == 170) {
+    	  ofstream ooops("q.mtx");
+    	  ooops.precision(19);
+    	  ooops << Q;
+    	  ooops.close();
+      }
       V = Q.rowwise().maxCoeff();
       for (int s = 0; s < S; s++) {
-    	  int k;
+    	  int k = 0;
     	  Q.row(s).maxCoeff(&k);
     	  policy(s,t) = k;
+    	  //cout << k;
       }
       if (t/100 == counter) {
     	  counter++;

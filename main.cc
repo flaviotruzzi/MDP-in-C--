@@ -29,26 +29,41 @@ int main(int argc, char **argv) {
 	int G = atoi(root["G"].toStyledString().c_str());
 	int tau = atoi(root["tau"].toStyledString().c_str());
 	int n_means = atoi(root["n_means"].toStyledString().c_str());
-	double prequest = atof(root["Prequest"].toStyledString().c_str());
-	double Pg[G];
+	MYTYPE prequest;
+	std::stringstream ss(root["Prequest"].toStyledString().c_str());
+	MYTYPE x;
+	ss >> x;
+	prequest = x;
+	MYTYPE Pg[G];
 
 	Json::Value pg;
 	pg = root["Pg"];
 
-	for (unsigned int i = 0; i < pg.size(); i++)
-		Pg[i] = atof(pg[i].toStyledString().c_str());
-
-	MatrixXd CTR(G,C);
+	for (unsigned int i = 0; i < pg.size(); i++) {
+		std::stringstream ss(pg[i].toStyledString().c_str());
+		MYTYPE x;
+		ss >> x;
+		Pg[i] = x;
+	}
+	MatrixXld CTR(G,C);
 
 	for ( int i = 0; i < G; i++)
-		for (int j = 0; j < C; j++)
-			CTR(i,j) = atof(root["CTR"][i][j].toStyledString().c_str());
+		for (int j = 0; j < C; j++) {
+			std::stringstream ss(root["CTR"][i][j].toStyledString().c_str());
+			MYTYPE x;
+			ss >> x;
+			CTR(i,j) = x;
+		}
 
 
-	VectorXd CPC(C);
+
+	VectorXld CPC(C);
 
 	for ( int i = 0; i < C; i++) {
-		CPC(i) = atof(root["CPC"][i].toStyledString().c_str());
+		std::stringstream ss(root["CPC"][i].toStyledString().c_str());
+		MYTYPE x;
+		ss >> x;
+		CPC(i) = x;
 	}
 
 	MDP k(C,G,B,tau,prequest,CTR,Pg,CPC);
@@ -65,6 +80,17 @@ int main(int argc, char **argv) {
 	sim << a.values;
 	sim.close();
 
+	ofstream simm0("sim0.mtx");
+	simm0 << a.simulations[0];
+	simm0.close();
+
+	ofstream simm1("sim1.mtx");
+	simm1 << a.simulations[1];
+	simm1.close();
+
+	ofstream policy("policy.mtx");
+	policy << k.policy;
+	policy.close();
 
 
 	return 0;

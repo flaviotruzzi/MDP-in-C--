@@ -15,23 +15,25 @@
 using namespace Eigen;
 using namespace std;
 
+
+
 class Simulator
 {
 public:
-  Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, int sims, double Prequest, double *Pg, MDP *mdp);
+  Simulator(int C, int G, int B, MatrixXld CTR, MatrixXld CPC, int tau, int sims, MYTYPE Prequest, MYTYPE *Pg, MDP *mdp);
   int randomWeighted();
   MatrixXi *simulations;
   virtual  ~Simulator();
   int n_means;
   void Simulate();
-  MatrixXd values;
+  MatrixXld values;
 private:
-  double *Pg;
-  double Prequest;
+  MYTYPE *Pg;
+  MYTYPE Prequest;
   int tau;
   int C;
-  MatrixXd CTR;
-  MatrixXd CPC;
+  MatrixXld CTR;
+  MatrixXld CPC;
   default_random_engine generator;
   bernoulli_distribution distribution;
   MDP *mdp;

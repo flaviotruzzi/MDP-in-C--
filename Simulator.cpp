@@ -12,7 +12,7 @@
 using namespace Eigen;
 using namespace std;
 
-Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, int sims, double Prequest, double *Pg, MDP *mdp) {
+Simulator::Simulator(int C, int G, int B, MatrixXld CTR, MatrixXld CPC, int tau, int sims, MYTYPE Prequest, MYTYPE *Pg, MDP *mdp) {
 
   n_means = sims;
 
@@ -20,7 +20,7 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
   srand((unsigned)time(0));
 
   this->mdp = mdp;
-  this->Pg = new double[G];
+  this->Pg = new MYTYPE[G];
   this->tau = tau;
   this->C = C;
   this->G = G;
@@ -41,16 +41,17 @@ Simulator::Simulator(int C, int G, int B, MatrixXd CTR, MatrixXd CPC, int tau, i
 
  for (int r = 0; r < sims; r++) {
      simulations[r] = MatrixXi(C+1,tau);
+     simulations[r].setConstant(0);
      for (int t = 0; t < tau; t++) {
     	 int g = randomWeighted();
-       if (g > 0) {
-         for (int c = 0; c < C; c++) {
-           double rnd = double(rand())/RAND_MAX;
-           if (rnd < CTR(g-1,c))
-             simulations[r](c,t) = 1;
-           else
-             simulations[r](c,t) = 0;
-         }
+		 if (g > 0) {
+		   for (int c = 0; c < C; c++) {
+			 double rnd = double(rand())/RAND_MAX;
+			 if (rnd < CTR(g-1,c))
+			   simulations[r](c,t) = 1;
+			 else
+			   simulations[r](c,t) = 0;
+			 }
        }
        simulations[r](C,t) = g;
      }
@@ -80,7 +81,7 @@ void printState(int *s, int C) {
 
 void Simulator::Simulate() {
 	cout << "Simulating...";
-	values = MatrixXd(n_means,tau);
+	values = MatrixXld(n_means,tau);
 	values.setConstant(0.0);
 	for (int r = 0; r < n_means; r++) {
 		int s[C+1];
@@ -91,10 +92,12 @@ void Simulator::Simulate() {
 			int g = simulations[r](C,t); // teve requisição!?
 			s[C] = g;
 			int c = mdp->getAction(mdp->getIndexOfState(s),t);
+			cout << "t: " << t << " "; printState(s,C);
+			cout << " " << "index:" << mdp->getIndexOfState(s) << " ação:" << c;
+			if (g > 0) cout << " *" << endl;
+			else cout << endl;
 			if ((g>0) && (c>0) && (s[c-1] > 0) && (simulations[r](c-1,t) > 0)) {
 				values(r,t) = simulations[r](c-1,t)*CPC(c-1);
-				cout << "t: " << t << " "; printState(s,C);
-				cout << " " << "index:" << mdp->getIndexOfState(s) << " ação:" << c << endl;
 				s[c-1] = s[c-1] -1;
 			}
 		}

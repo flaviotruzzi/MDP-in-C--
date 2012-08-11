@@ -14,10 +14,15 @@
 
 using namespace Eigen;
 
+typedef double MYTYPE;
+
+typedef Matrix<MYTYPE, Dynamic, Dynamic> MatrixXld;
+typedef Matrix<MYTYPE, Dynamic, 1> VectorXld;
+
 class MDP
 {
 public:
-  MDP(int C, int G, int B, int tau, double Prequest, MatrixXd CTR, double *Pg, VectorXd CPC);
+  MDP(int C, int G, int B, int tau, MYTYPE Prequest, MatrixXld CTR, MYTYPE *Pg, VectorXld CPC);
   void getStateOfIndex(long index, int *s);
   void PopulateMtx();
   void ValueIteration();
@@ -25,10 +30,10 @@ public:
   int getAction(long index, int t);
   int checkT();
   MatrixXi policy;
-  SparseMatrix<double> *T;
-  MatrixXd *R;
-  MatrixXd V;
-  MatrixXd eCPI;
+  SparseMatrix<MYTYPE> *T;
+  MatrixXld *R;
+  MatrixXld V;
+  MatrixXld eCPI;
   virtual
   ~MDP();
 
@@ -40,14 +45,14 @@ private:
   int B;
   int tau;
 
-  MatrixXd CTR;
-  double *Pg;
-  VectorXd CPC;
+  MatrixXld CTR;
+  MYTYPE *Pg;
+  VectorXld CPC;
 
-  MatrixXd Q;
+  MatrixXld Q;
   //SparseMatrix<double> *T;
 //  SparseMatrix<double> *R;
-  double Prequest;
+  MYTYPE Prequest;
 };
 
 #endif /* MDP_H_ */
